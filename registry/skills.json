@@ -1,6 +1,6 @@
 {
   "schema_version": "rosclaw.skills_registry.v1",
-  "generated_at": "2026-07-01T10:37:23.531954Z",
+  "generated_at": "2026-07-02T07:00:26.351850Z",
   "source_repo": "https://github.com/ros-claw/skills",
   "skills": [
     {
@@ -44,7 +44,45 @@
         "readme": "skills/inspire_rh56_hand_gestures/README.md"
       },
       "checksums": {
-        "package_sha256": "sha256:e24e65221749553940a3ef647096b7c604f0b2e7fd8c0a2b9b433f46ba58a118"
+        "package_sha256": "sha256:cdd8a977200ff9a651c37f69e9230c2fadb92240684248d38ae7d2723d18ce6c"
+      }
+    },
+    {
+      "name": "rosclaw/realsense_camera_usage",
+      "display_name": "Realsense Camera Usage",
+      "version": "0.1.0",
+      "description": "RealSense camera usage skill: enumerate cameras, check status, capture RGB/depth frames, and report basic health for D405 / D435i setups.",
+      "category": "perception",
+      "robot_types": [
+        "universal"
+      ],
+      "compatible_robots": [
+        "universal"
+      ],
+      "tags": [
+        "realsense",
+        "realsense_d405",
+        "realsense_d435i",
+        "realsense_dual",
+        "perception",
+        "physical-ai"
+      ],
+      "official": true,
+      "installable": true,
+      "verification_status": "official_verified",
+      "source": {
+        "type": "github_subdir",
+        "repo": "https://github.com/ros-claw/skills",
+        "ref": "main",
+        "subdir": "skills/realsense_camera_usage"
+      },
+      "files": {
+        "skill_yaml": "skills/realsense_camera_usage/skill.yaml",
+        "skill_md": "skills/realsense_camera_usage/SKILL.md",
+        "readme": "skills/realsense_camera_usage/README.md"
+      },
+      "checksums": {
+        "package_sha256": "sha256:cfe60dc273095069d1660477989c1c4f4d34377806ab8820fda6f993f382777f"
       }
     },
     {

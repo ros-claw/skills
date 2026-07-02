@@ -1,0 +1,26 @@
+{
+  "schema_version": "rosclaw.hashes.v1",
+  "files": {
+    "CHANGELOG.md": "sha256:b43f063dbcfa2a4afc6d6aba606d5759d1389fe34cc40468bd6ba826645de7dd",
+    "README.md": "sha256:4a7dae683f7d8addb075b01b4e46850d7ff929a9e6957892d22b06ff4e3ab028",
+    "SKILL.md": "sha256:0f012c39e56ff8180e116af259d0f7d516e7aa076160e19c43150f260a549403",
+    "behavior_tree.xml": "sha256:967e3e6690a38482401aafe6f1b715851517c069637da4b56143423b52de4b9b",
+    "darwin_eval.yaml": "sha256:ce6ee7d126c5874a0d1f750dac88024051f85352e67185143439c059e27928b4",
+    "dojo.yaml": "sha256:40ab07aed152d5556305d742dc7440b4a55914cafbfcb8fbe332952f93fa379e",
+    "e-urdf-compat.yaml": "sha256:c911452b0f3d9837fcd361df26fe39cedfebf5d35aca6d93aebbf9fbccc96aa2",
+    "evidence/reports/.gitkeep": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lineage.yaml": "sha256:43aedf7195a7ee4233fc935f206a10dd10b106646714377ee8813bc11df07453",
+    "policies/checkpoints/.gitkeep": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "policies/params/default.yaml": "sha256:c96a76665692b5e069d3f15173d944fdf3d2fac59097adca928fc018b19eebb6",
+    "policies/policy.yaml": "sha256:872f42b8d8f7f72942425ca5166fe38219bf48c691870dfbc4c31c711e4483e2",
+    "prompts/executor.md": "sha256:8d6f7b5c66090890af5d58275970f444ddd1a824692da620836c47c39a943f42",
+    "prompts/planner.md": "sha256:cc869a741314955bf15f30a3da898c7cb2f50c507413dcfac679119e3e6f77b8",
+    "prompts/recovery.md": "sha256:266a5094f39a644116cf56560ed786af792c1929e0b4b153fc2c24a72bcb830b",
+    "prompts/safety.md": "sha256:978c8ff0e5a61de8cb3e143db33d43fb9294e1311826eff7b42b18d843688374",
+    "prompts/verifier.md": "sha256:f3569de6e94373fa989789948307318dadba9dd8562a4a841aeb24c457f55a99",
+    "providers.yaml": "sha256:2ef9abb077ef1bb38661c8c859aef77a9a491af4b33e4a0b9a43ce9a64fa0d5d",
+    "safety.yaml": "sha256:dbf0f45e66bcec3ab9502ccb62bda0cb6b8314b43b4eafe4e645818dc2fb6e34",
+    "skill.yaml": "sha256:4f1ddb6a100128052c7c9e3a05b8fa222f03ec52ddc99db0b72f2e5d8e43e6e4"
+  },
+  "package_hash": "sha256:b4a3f7419b857938b46f4526df0fd80d99f96c097d41b0e7dd9f64c48b118dde"
+}

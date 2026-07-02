@@ -1,0 +1,15 @@
+{
+  "uploaded_at": "2026-07-02T06:23:40.770967Z",
+  "hub_base_url": "https://www.rosclaw.io",
+  "skill_name": "rosclaw/realsense_camera_usage",
+  "version": "0.1.0",
+  "visibility": "private",
+  "api_response": {
+    "id": "281fb407-cff2-4e4e-8444-7b093d99947f",
+    "name": "rosclaw/realsense_camera_usage",
+    "display_name": "Realsense Camera Usage",
+    "status": "approved",
+    "message": "Skill created successfully",
+    "status_code": 201
+  }
+}
