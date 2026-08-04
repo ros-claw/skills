@@ -30,17 +30,26 @@ the incident each rule comes from.
 7. **Never block safety interlocks on camera health.**  Force watchdogs and
    E-stop paths run on their own channels; a camera incident degrades the
    show, never the interlock.
-8. **Never trust `lsusb`/enumeration as health.**  A wedged camera
+8. **Retire a physical port whose controller has died twice.**  An xHCI
+   controller that logs `HC died` twice under the same camera is a bad
+   port, full stop — move the device to a port on a DIFFERENT controller
+   and never use the retired one again.  NVDA8000:00 died three times in
+   two days (2026-08-03 reset churn; 2026-08-04 reset-first capture class;
+   and 2026-08-04 13:45 with NO reset at all — the wedged control
+   channel's -110 timeouts alone killed it).  Note the third one: a
+   wedged camera left retrying can kill the controller by itself —
+   escalate instead of re-poking.
+9. **Never trust `lsusb`/enumeration as health.**  A wedged camera
    enumerates.  Health = frames flowing; wedge = `-110` at start; dead
    controller = `HC died` in dmesg.  Those are three different failures
    with three different recoveries — do not apply one recovery to another.
-9. **Gate privileged/persistent actions on explicit confirmation** — sudo,
+10. **Gate privileged/persistent actions on explicit confirmation** — sudo,
    udev rule edits, firmware updates, factory resets, PCI rebinds, global
    pip/project-dependency changes.  Non-privileged diagnosis (isolated
    venv, reading logs, rerunning the repro) runs freely.
-10. **Never compile librealsense from source** as a fix path — if that
+11. **Never compile librealsense from source** as a fix path — if that
     seems required, the correct move is a support packet, not a toolchain
     adventure on a production rig.
-11. **Pin every command to a serial number** on multi-camera rigs; on a
+12. **Pin every command to a serial number** on multi-camera rigs; on a
     one-camera rig still record model/serial/firmware/USB-speed at session
     start so later drift is detectable.

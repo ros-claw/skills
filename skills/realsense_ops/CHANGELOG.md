@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1] - 2026-08-04
+
+### Added
+- Safety rule 8: retire a physical port whose controller has died twice —
+  NVDA8000:00 died three times in two days, the third time with NO reset
+  at all (the wedged control channel's -110 timeouts alone killed it).
+  A wedged camera left retrying can kill the controller by itself.
+
 ## [1.1.0] - 2026-08-04
 
 ### Changed
