@@ -1,10 +1,10 @@
 {
   "schema_version": "rosclaw.skill_manifest.v1",
   "name": "ros-claw/realsense_ops",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "stage": "validated",
-  "package_hash": "sha256:eed0f1421ddec5f0a8663aae7e233c38e3933d36fef655bb1b0383a54a177b6f",
-  "created_at": "2026-08-04T05:56:33.940019Z",
+  "package_hash": "sha256:3b94ea1de2b2ddb68f75ef5f532eee34d7307de87d3226a6c35f3295be7cda86",
+  "created_at": "2026-08-04T10:55:01.999971Z",
   "entrypoint": "behavior_tree.xml",
   "required_files": [
     "skill.yaml",

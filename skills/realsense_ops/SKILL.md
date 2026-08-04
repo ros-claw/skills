@@ -19,11 +19,17 @@ camera management code*, not by the camera.
    a streaming pipeline; never `echo > /sys/.../reset` the device (a sysfs
    reset of a wedged D435i killed the neighbouring xHCI controller on a
    Jetson, 2026-07).  Always `pipeline.stop()` in-process.
-2. **`hardware_reset()` is the LAST resort, never maintenance.**  Issue it
-   only when `pipe.start()` has actually failed (UVC `GET_CUR` `-110`
-   timeout).  ~20 resets in one day plus ~30 pipeline stop/start cycles
-   killed xHCI host controller `NVDA8000:00` (dmesg: `Host halt failed,
-   -110 → HC died`, 2026-08-03).  Never reset "preventively" between
+2. **`hardware_reset()` is the LAST resort, never maintenance — and never
+   a `start()` default.**  Issue it only when `pipe.start()` has actually
+   failed (UVC `GET_CUR` `-110` timeout).  ~20 resets in one day plus ~30
+   pipeline stop/start cycles killed xHCI host controller `NVDA8000:00`
+   (dmesg: `Host halt failed, -110 → HC died`, 2026-08-03) — and the same
+   controller died AGAIN the next morning (2026-08-04) because the rig's
+   own capture class (`D435iCapture.start`) reset-first on EVERY start.
+   The 2026-07 "reset-first avoids wedges" lesson is only half the truth:
+   on firmware 5.17.x each reset is itself the stressor.  The canonical
+   `start()` is now the ladder: plain start → one reset only on failure
+   (ros-claw/rosclaw PR #218).  Never reset "preventively" between
    captures or cells.
 3. **One long-lived pipeline per session.**  Do not stop/start the pipeline
    per capture.  Start once, keep streaming, stop once at shutdown.
@@ -64,7 +70,8 @@ camera management code*, not by the camera.
 
 ## Evidence
 
-- Field incidents and fixes: ROSClaw TwinTouch rig, 2026-07-14 .. 2026-08-03.
+- Field incidents and fixes: ROSClaw rig, 2026-07-14 .. 2026-08-04
+  (incl. both xHCI controller deaths, 2026-08-03 and 2026-08-04).
 - Community grounding: librealsense issue #3263 (xHCI halt with D435i),
   Jetson xusb/SMMU crash reports, `usbfs_memory_mb=1024` mitigation,
   firmware 5.13.0.50 for IMU-related freezes, PCI unbind/rebind recovery.
