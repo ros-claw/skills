@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0] - 2026-08-04
+
+### Changed
+- Rule 2/3 sharpened: `hardware_reset` is never a `start()` DEFAULT either —
+  the 2026-07 "reset-first" lesson is retired (plain start first; reset only
+  on failure).  Trigger: the rig's own `D435iCapture.start` reset-first on
+  every start and killed NVDA8000:00 a SECOND time (2026-08-04); the
+  canonical class is fixed to the ladder (ros-claw/rosclaw PR #218).
+- New mandatory rule: camera reads and safety telemetry/watchdog on
+  DIFFERENT threads — a hung `wait_for_frames()` (mid-stream stall blocks
+  PAST its timeout) froze telemetry+watchdog and cascaded four aborted
+  runs (2026-08-04).  Both gates tripping together = app threading bug.
+- Gate sizing generalised: EVERY freshness gate sized to the producer it
+  watches (camera 500ms→3s, telemetry 1.0s→3s; `cap.read`'s 2s blocking
+  timeout sets the loop's worst-case iteration).
+- Startup/burst staleness protocol: wait 1.2–1.5s + retry the dispatch
+  ONCE — clears without any hardware action.
+
 ## [1.0.0] - 2026-08-04
 
 ### Added

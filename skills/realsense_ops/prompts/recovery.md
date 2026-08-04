@@ -13,7 +13,9 @@ note "transient stall".  Dead > 5 s → rung 2.
 ## Rung 2 — graceful pipeline restart (seconds, low risk)
 
 In-process: `pipe.stop()` (graceful, must not throw — suppress and
-continue), then `pipe.start(cfg)` once.  If start succeeds and frames
+continue), then `pipe.start(cfg)` once — **plainly, without a reset**
+(the canonical `D435iCapture.start` implements exactly this ladder since
+ros-claw/rosclaw PR #218).  If start succeeds and frames
 flow, done.  If start throws the `-110` xioctl timeout → rung 3.  Do not
 loop this rung: one restart per incident.
 

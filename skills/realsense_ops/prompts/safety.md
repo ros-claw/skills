@@ -11,10 +11,14 @@ the incident each rule comes from.
    D435i killed a neighbouring xHCI host controller (2026-07).  The only
    sanctioned unbind/rebind is of an **already-dead xHCI controller**, by
    verified PCI address (see recovery.md rung 5).
-3. **Never `hardware_reset()` preventively** — not before sessions, not
-   between captures, not "because it's been a while".  It is reserved for
-   an actually-failed `pipe.start()` (-110 wedge).  ~20 in a day destroyed
-   a host controller (2026-08-03).
+3. **Never `hardware_reset()` preventively — and never as a `start()`
+   default.**  Not before sessions, not between captures, not "because
+   it's been a while", not "to be safe at open".  It is reserved for an
+   actually-failed `pipe.start()` (-110 wedge).  ~20 in a day destroyed a
+   host controller (2026-08-03); a capture class that reset-first on every
+   start destroyed it again (2026-08-04).  The 2026-07 "reset-first avoids
+   wedges" lesson is officially retired: plain start first, reset only on
+   failure.
 4. **Never retry `pipe.start()` in a tight loop** after a wedge — each
    attempt pokes the wedged control channel.  Escalate instead (rung 3+).
 5. **Never let a freshness gate tighter than the collector's worst-case

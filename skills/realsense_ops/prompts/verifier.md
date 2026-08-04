@@ -46,6 +46,12 @@ dead camera from a stale timestamp or from `lsusb` alone.
   advancing frame counter: that is collector-loop scheduling, not a wedge.
   Verify by waiting 1.5 s — the timestamp advances.  Fix the gate, not the
   camera.
+- **BOTH gates tripping together** (camera stale AND telemetry stale,
+  ages >2 s): the collector is single-threaded and its camera read is
+  hung — that is a THREADING bug in the app, not a device fault.  Split
+  telemetry/watchdog and camera reads onto separate threads (the
+  2026-08-04 cascade).  A dead camera ages ONLY the camera gate; a dead
+  hand ages ONLY the telemetry gate; both together = your loop.
 - **Video stalls but depth/telemetry continues**: consumer-side backup
   (video writer on the read thread).  Not a device fault.
 - **`No device connected` after heavy reset/stop-start churn**: the

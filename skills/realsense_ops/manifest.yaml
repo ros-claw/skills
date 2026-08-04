@@ -4,7 +4,7 @@ asset:
   type: "skill"
   namespace: "ros-claw"
   name: "realsense_ops"
-  version: "1.0.0"
+  version: "1.1.0"
   title: "RealSense Operations Discipline"
   summary: "Lifecycle rules, wedge recovery ladder, freshness gating, and USB/xHCI topology diagnosis for Intel RealSense D400 cameras — keeps pipelines alive for full sessions and never kills the host controller with recovery churn."
   description: |
@@ -39,7 +39,7 @@ lifecycle:
   status: "stable"
 
 compatibility:
-  rosclaw_min: "1.0.0"
+  rosclaw_min: "1.1.0"
   robots:
     - "realsense_d435i"
     - "realsense_d405"
@@ -67,51 +67,18 @@ security:
   signing: "local-unsigned"
   notes: "Read-only by default; recovery actions follow prompts/recovery.md and never include sysfs device resets."
   checksums:
-    skill.yaml: "sha256:23b3f09123e057068fd6fe20b1e0593df19fe558aa0bcf8befd116c11334f190"
-    SKILL.md: "sha256:a8a59b5e7492e8216394f0383b71e0c272c129aa4f2310f797d9c125cd7c6fbe"
-    scripts/realsense_doctor.py: "sha256:383a46e904126b96a2281440f68bbd4024416329d9ec59db4ee4888eec3a5562"
-    prompts/planner.md: "sha256:aaf189722abd1c9951d0dd5023b3adc790aaaea81223d68f246b7fba9ff08809"
-    prompts/executor.md: "sha256:37567c0148e8cf91c87c643ddaefec6deeaff736b62f9213b12ffa1979f3df89"
-    prompts/verifier.md: "sha256:87bbd1f3b9baa80fc97156655a1abf3ce2696c5c52e230bc376bbff9e795640c"
-    prompts/recovery.md: "sha256:151fc216010f2d96e42d39334a431eb4456bcfa42f84ea6a6043d4ff7250c590"
-    prompts/safety.md: "sha256:6b43a5511c709c50f6e8eea077d88854ddede08faa64953760a7c94e708cd25d"
-
-
-artifacts:
-  - name: "skill_manifest"
-    path: "skill.yaml"
-    kind: "skill_manifest"
-  - name: "skill_doc"
-    path: "SKILL.md"
-    kind: "documentation"
-  - name: "realsense_doctor"
-    path: "scripts/realsense_doctor.py"
-    kind: "script"
-  - name: "prompt_planner"
-    path: "prompts/planner.md"
-    kind: "prompt"
-  - name: "prompt_executor"
-    path: "prompts/executor.md"
-    kind: "prompt"
-  - name: "prompt_verifier"
-    path: "prompts/verifier.md"
-    kind: "prompt"
-  - name: "prompt_recovery"
-    path: "prompts/recovery.md"
-    kind: "prompt"
-  - name: "prompt_safety"
-    path: "prompts/safety.md"
-    kind: "prompt"
-
-install:
-  method: "copy"
-  target: "~/.rosclaw/skills/installed/realsense_ops"
-  entrypoints:
-    doctor: "scripts/realsense_doctor.py"
+    skill.yaml: "sha256:88cf610544a6a1316660f6b3da865eac6d4a03030766e4ee8e086a7aea9ac8db"
+    SKILL.md: "sha256:f4ae98f866d15a5791a5998c8e7fe8547d51c482e91f6cea281f2adb5b614da1"
+    scripts/realsense_doctor.py: "sha256:1333bd7aee0f0d76c1e9a637b46960569af37f534eccee119122cbdb5dee388d"
+    prompts/planner.md: "sha256:bc32a44b91c77eaa7628ddbdb747005bb489e85fe1997a19e042e9919a0f753b"
+    prompts/executor.md: "sha256:aace0339ef5f9897bf3a5cee55433a2095c4e7c3b129f87627cdf3b6b312e821"
+    prompts/verifier.md: "sha256:809566e7b2f2c0608ee4d7d69ac2dc702953c78167c4eeb684ad6c330b93d4e5"
+    prompts/recovery.md: "sha256:44f1aa3ad6e031eb5a28f7c27b553dc1a9c9b9ae11779e651ff8a9ff570dbe99"
+    prompts/safety.md: "sha256:04cf40735268472a746a6efe8c92b31734de6e08876a5ec1bbc76a881c493b70"
 special:
   skill:
     skill_id: "ros-claw/realsense_ops"
-    skill_version: "1.0.0"
+    skill_version: "1.1.0"
     schema_version: "rosclaw.skill.v1"
     manifest_path: "skill.yaml"
     category: "perception"
