@@ -75,6 +75,39 @@ security:
     prompts/verifier.md: "sha256:809566e7b2f2c0608ee4d7d69ac2dc702953c78167c4eeb684ad6c330b93d4e5"
     prompts/recovery.md: "sha256:44f1aa3ad6e031eb5a28f7c27b553dc1a9c9b9ae11779e651ff8a9ff570dbe99"
     prompts/safety.md: "sha256:04cf40735268472a746a6efe8c92b31734de6e08876a5ec1bbc76a881c493b70"
+
+artifacts:
+  - name: "skill_manifest"
+    path: "skill.yaml"
+    kind: "skill_manifest"
+  - name: "skill_doc"
+    path: "SKILL.md"
+    kind: "documentation"
+  - name: "realsense_doctor"
+    path: "scripts/realsense_doctor.py"
+    kind: "script"
+  - name: "prompt_planner"
+    path: "prompts/planner.md"
+    kind: "prompt"
+  - name: "prompt_executor"
+    path: "prompts/executor.md"
+    kind: "prompt"
+  - name: "prompt_verifier"
+    path: "prompts/verifier.md"
+    kind: "prompt"
+  - name: "prompt_recovery"
+    path: "prompts/recovery.md"
+    kind: "prompt"
+  - name: "prompt_safety"
+    path: "prompts/safety.md"
+    kind: "prompt"
+
+install:
+  method: "copy"
+  target: "~/.rosclaw/skills/installed/realsense_ops"
+  entrypoints:
+    doctor: "scripts/realsense_doctor.py"
+
 special:
   skill:
     skill_id: "ros-claw/realsense_ops"
