@@ -1,0 +1,101 @@
+schema_version: "rosclaw.skill.v1"
+kind: "Skill"
+
+metadata:
+  name: "realsense_ops"
+  display_name: "RealSense Operations Discipline (lifecycle, wedge recovery, USB topology)"
+  namespace: "ros-claw"
+  version: "1.0.0"
+  stage: "validated"
+  category: "perception"
+  tags:
+    - realsense
+    - d435i
+    - d405
+    - d455
+    - usb
+    - xhci
+    - lifecycle
+    - wedge-recovery
+    - operations
+    - physical-ai
+  description: |
+    Operational discipline for Intel RealSense D400 cameras on production rigs
+    (Jetson / x86 Linux), distilled from field incidents on the ROSClaw
+    dual-RH56 rig through 2026-08-03.  Complements the executable capture
+    skill `realsense_capture_rgbd` (which takes pictures) and the community
+    `realsense-troubleshoot` guide (generic app debugging) — this skill is
+    about NOT killing the camera or the USB host controller while running
+    long streaming sessions, and about recovering correctly when the bus
+    wedges anyway.  Includes scripts/realsense_doctor.py: one-shot
+    enumeration + controller-topology + dmesg-signature diagnosis with an
+    escalation-ordered recovery recommendation.
+  license: "MIT"
+  authors:
+    - name: "ROSClaw Test Team"
+      url: "https://github.com/ros-claw"
+
+identity:
+  skill_id: "ros-claw/realsense_ops"
+  package_name: "ros-claw/realsense_ops"
+  canonical_uri: "rosclaw://skills/ros-claw/realsense_ops"
+  git_repo: "https://github.com/ros-claw/skills"
+  git_ref: "main"
+  source_subdir: "skills/realsense_ops"
+  git_commit: null
+
+task:
+  intent: "realsense_ops"
+  natural_language:
+    en: "Operate a RealSense camera safely for long sessions; diagnose and recover USB wedges without killing the host controller."
+    zh: "安全地长时间使用 RealSense 相机；诊断并恢复 USB 卡死，且不弄死主机控制器。"
+  input_contract:
+    required:
+      - realsense_device
+    optional:
+      - serial_number
+  output_contract:
+    success_condition:
+      - "pipeline streams continuously without unplanned stop/start cycles"
+      - "zero hardware_resets issued unless pipe.start actually failed"
+    artifacts:
+      - doctor_report
+      - recovery_log
+
+execution:
+  entrypoint:
+    type: "behavior_tree"
+    file: "behavior_tree.xml"
+  runtime_adapter: "rosclaw.runtime.skill_executor"
+  policy:
+    type: "rule_based"
+    config: "policies/policy.yaml"
+  prompts:
+    planner: "prompts/planner.md"
+    executor: "prompts/executor.md"
+    verifier: "prompts/verifier.md"
+    recovery: "prompts/recovery.md"
+    safety: "prompts/safety.md"
+
+compatibility:
+  eurdf: "e-urdf-compat.yaml"
+  providers: "providers.yaml"
+  safety: "safety.yaml"
+
+evaluation:
+  dojo: "dojo.yaml"
+  darwin: "darwin_eval.yaml"
+  tests: "tests/"
+
+lineage:
+  file: "lineage.yaml"
+
+evidence:
+  directory: "evidence/"
+  latest_eval_report: null
+
+status:
+  promotion_state: "stable"
+  last_eval_passed: false
+  safe_to_run_on_real_robot: true
+  recommended_runtime_mode: "real_ok"
