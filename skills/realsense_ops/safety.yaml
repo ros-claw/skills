@@ -1,0 +1,41 @@
+schema_version: "rosclaw.safety.v1"
+
+runtime_mode:
+  default: "real_ok"
+  allowed:
+    - dry_run
+    - replay
+    - sandbox
+
+hard_constraints:
+  camera_lifecycle:
+    graceful_stop_only: true
+    no_sigterm_on_streaming_pipeline: true
+    no_sysfs_device_reset: true
+    hardware_reset_only_on_failed_pipe_start: true
+    max_hardware_resets_per_incident: 1
+    no_pipeline_start_retry_loops: true
+    single_pipeline_owner_process: true
+  freshness:
+    gate_ms_min: 3000
+    staleness_triggers_logging_only: true
+    hardware_recovery_requires_dead_frames_over_ms: 5000
+  topology:
+    pci_rebind_requires_verified_address: true
+
+environment:
+  notes: "This skill manages a camera, not an actuator.  Interlocks must stay camera-independent (prompts/safety.md rule 7)."
+
+sandbox:
+  required_checks:
+    - usb_topology_check
+    - lifecycle_policy_check
+  block_on:
+    - sysfs_reset_attempt
+    - preventive_hardware_reset
+
+failure_policy:
+  on_sandbox_block: "abort_and_explain"
+  on_low_confidence: "verify_or_abort"
+  on_repeated_failure: "write_memory_and_stop"
+  max_runtime_retries: 1
