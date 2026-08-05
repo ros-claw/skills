@@ -39,17 +39,28 @@ the incident each rule comes from.
    channel's -110 timeouts alone killed it).  Note the third one: a
    wedged camera left retrying can kill the controller by itself —
    escalate instead of re-poking.
-9. **Never trust `lsusb`/enumeration as health.**  A wedged camera
+9. **A camera whose wedge kills host controllers gets BENCHED, not
+   re-tried.**  If `HC died` fires a second time regardless of which
+   controller/port hosts the camera, stop attaching it to that machine:
+   the device/firmware is the killer (D435i @ 5.17.0.10 killed
+   NVDA8000:00 twice and NVDA8000:01 once across 2026-08-03..05, each
+   time minutes into streaming, each time via wedged-control-channel
+   -110 timeouts).  Downgrade the firmware on a PC (D435i on Jetson:
+   5.13.0.50 is the community-verified stable), or try a different
+   cable (a degrading cable produces exactly this intermittent -110
+   pattern), or swap the unit.  NEVER move a controller-killing camera
+   onto the controller that hosts your actuators' serial links.
+10. **Never trust `lsusb`/enumeration as health.**  A wedged camera
    enumerates.  Health = frames flowing; wedge = `-110` at start; dead
    controller = `HC died` in dmesg.  Those are three different failures
    with three different recoveries — do not apply one recovery to another.
-10. **Gate privileged/persistent actions on explicit confirmation** — sudo,
+11. **Gate privileged/persistent actions on explicit confirmation** — sudo,
    udev rule edits, firmware updates, factory resets, PCI rebinds, global
    pip/project-dependency changes.  Non-privileged diagnosis (isolated
    venv, reading logs, rerunning the repro) runs freely.
-11. **Never compile librealsense from source** as a fix path — if that
+12. **Never compile librealsense from source** as a fix path — if that
     seems required, the correct move is a support packet, not a toolchain
     adventure on a production rig.
-12. **Pin every command to a serial number** on multi-camera rigs; on a
+13. **Pin every command to a serial number** on multi-camera rigs; on a
     one-camera rig still record model/serial/firmware/USB-speed at session
     start so later drift is detectable.
