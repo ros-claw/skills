@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.2] - 2026-08-05
+
+### Added
+- Safety rule 9: a camera whose wedge kills host controllers gets BENCHED —
+  when `HC died` fires on a SECOND controller, the device/firmware is the
+  killer (D435i @ 5.17.0.10 killed NVDA8000:00 twice and NVDA8000:01 once,
+  2026-08-03..05, minutes into streaming each time).  Firmware downgrade on
+  a PC (5.13.0.50 for D435i-on-Jetson), cable swap, or unit swap; never
+  move it onto the actuator serial-link controller.
+
 ## [1.1.1] - 2026-08-04
 
 ### Added
