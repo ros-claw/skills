@@ -6,7 +6,7 @@ metadata:
   display_name: "RealSense Operations Discipline (lifecycle, wedge recovery, USB topology)"
   namespace: "ros-claw"
   version: "1.1.2"
-  stage: "validated"
+  stage: "official_verified"
   category: "perception"
   tags:
     - realsense
