@@ -1,6 +1,6 @@
 {
   "schema_version": "rosclaw.skills_registry.v1",
-  "generated_at": "2026-08-24T09:55:57.068447Z",
+  "generated_at": "2026-08-24T10:30:55.888334Z",
   "source_repo": "https://github.com/ros-claw/skills",
   "skills": [
     {
@@ -124,7 +124,7 @@
         "readme": "skills/realsense_ops/README.md"
       },
       "checksums": {
-        "package_sha256": "sha256:941a976066d7c1f0553fb45bdaa875aba68dc2ffae7ef005b65fa7ccf8e6789e"
+        "package_sha256": "sha256:0fdfbe2c2e80292658fbe62c09911482fbc7258ffc83cc60d03d613f97f725f8"
       }
     },
     {
@@ -162,7 +162,7 @@
         "readme": "skills/ros_install/README.md"
       },
       "checksums": {
-        "package_sha256": "sha256:adc2c7c7ceeaf7848627c723c55e5350e273098684d4bbf66a81d2c3f13d05e0"
+        "package_sha256": "sha256:8bd22a64ae2ec6f60a6701ed5c467aa33636c8bcbf4b7f9dc7437e1170933d92"
       }
     }
   ]

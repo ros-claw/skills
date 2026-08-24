@@ -102,6 +102,10 @@ jobs:
           print("plan_hash:", plan["plan_hash"])
           EOF
 
+      - name: Quiesce unattended apt services (avoid dpkg lock races)
+        run: |
+          sudo systemctl stop apt-daily.service apt-daily-upgrade.service apt-daily.timer apt-daily-upgrade.timer || true
+
       - name: Approve, authorize and execute (passwordless sudo runner)
         env:
           ROSCLAW_HOME: ${{ github.workspace }}/.rosclaw-e2e
@@ -112,6 +116,16 @@ jobs:
           JOB_ID=$(python -c "import json; print(json.load(open('auth.json'))['job_id'])")
           echo "JOB_ID=$JOB_ID" >> "$GITHUB_ENV"
           rosclaw host authorize "$JOB_ID"
+
+      - name: Dump job and receipt (always, for diagnosis)
+        if: always()
+        env:
+          ROSCLAW_HOME: ${{ github.workspace }}/.rosclaw-e2e
+        run: |
+          rosclaw skill job "$JOB_ID" --json > job.json || true
+          cat job.json
+          RECEIPT=$(python -c "import json; print(json.load(open('job.json')).get('receipt_path',''))" 2>/dev/null || true)
+          if [ -n "$RECEIPT" ] && [ -f "$RECEIPT" ]; then cat "$RECEIPT"; else echo "no receipt yet"; fi
 
       - name: Receipt must be VERIFIED
         env:

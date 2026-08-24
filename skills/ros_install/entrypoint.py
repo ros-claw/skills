@@ -139,6 +139,7 @@ def plan(context: dict, args: dict) -> dict:
         return _plan_envelope(context, distro, codename, profile, operations,
                               note="repair_existing_install")
 
+    operations.append({"type": "package.update"})
     operations.append(
         {
             "type": "package.install",
