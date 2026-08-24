@@ -1,11 +1,11 @@
-schema_version: rosclaw.skill.v1
+schema_version: rosclaw.skill.v2
 kind: Skill
 
 metadata:
   name: ros_install
   display_name: ROS Install
   namespace: ros-claw
-  version: 0.1.0
+  version: 0.2.0
   stage: official_verified
   candidate_id: null
   category: environment
@@ -15,8 +15,8 @@ metadata:
     - host_workstation
     - install
     - environment
-    - fishros-inspired
-  description: Install, verify, or repair a ROS / ROS 2 environment on the host workstation. Inspired by FishROS one-click installer.
+    - ros2-apt-source
+  description: Install, verify, or repair a ROS / ROS 2 environment on the host workstation. Uses the official ros2-apt-source flow with typed HostOps plans.
   license: Apache-2.0
   authors:
     - name: ROSClaw Team
@@ -31,33 +31,62 @@ identity:
   source_subdir: skills/ros_install
   git_commit: null
 
+# Skill Runtime 2.0 capability declaration (doc §4/§7): agents resolve the
+# intent, never the skill name.
+capability:
+  id: environment.install.ros
+  intents:
+    en:
+      - install ROS
+      - install ROS 2
+      - setup ROS2
+      - repair ROS installation
+    zh:
+      - 安装 ROS
+      - 安装 ROS2
+      - 配置 ROS2
+      - 修复 ROS 环境
+
 task:
   intent: Install, verify, or repair a ROS / ROS 2 environment on the host workstation.
   natural_language:
     en: Install ROS / ROS 2 on the host workstation, verify the installation, or repair an existing one.
+    zh: 在宿主机上安装 ROS / ROS 2，验证安装结果，或修复现有安装。
   input_contract:
     required:
       - host_state
     optional:
-      - target_distro
-      - install_mode
-      - allow_sudo
-      - execute
+      - profile
   output_contract:
     success_condition:
-      - ros_setup_sourced == true
-      - roscli_available == true
-      - rosdep_initialized == true
+      - opt_ros_present == true
+      - ros2_cli_works == true
+      - rosdep_configured == true
+      - dds_pubsub_verified == true
     artifacts:
-      - install_plan
-      - executed_commands
+      - execution_plan
+      - execution_receipt
       - verification_report
 
 execution:
+  domain: host
+  # Skill Runtime 2.0 typed planner/verifier (doc §8/§49): all ROS domain
+  # knowledge lives in entrypoint.py, not in ROSClaw Core.
+  planner:
+    type: python
+    entrypoint: entrypoint.py:plan
+  verifier:
+    type: python
+    entrypoint: entrypoint.py:verify
+  recover:
+    type: python
+    entrypoint: entrypoint.py:recover
+  # Legacy v1 behavior-tree entry retained for older runtimes; the golden
+  # path is planner/verifier above (doc §8: BT is optional, not required).
   entrypoint:
     type: behavior_tree
     file: behavior_tree.xml
-  runtime_adapter: rosclaw.runtime.skill_executor
+  runtime_adapter: rosclaw.skill.service.build_skill_plan
   policy:
     type: hybrid
     config: policies/policy.yaml
@@ -68,10 +97,28 @@ execution:
     recovery: prompts/recovery.md
     safety: prompts/safety.md
 
+permissions:
+  - host.package.install
+  - host.repository.configure
+  - host.file.managed_write
+  - host.network.fetch
+
 compatibility:
   eurdf: e-urdf-compat.yaml
   providers: providers.yaml
   safety: safety.yaml
+  # Host compatibility consumed by CapabilityResolver (doc §35): the
+  # distro matrix itself lives in entrypoint.py as skill data.
+  os:
+    - ubuntu
+  architectures:
+    - amd64
+    - arm64
+
+safety:
+  approval_scope: transaction
+  privilege: admin
+  arbitrary_root_shell: false
 
 evaluation:
   dojo: dojo.yaml
@@ -92,7 +139,7 @@ status:
   recommended_runtime_mode: dry_run
   official: true
   installable: true
-  verification_status: official_verified
+  verification_status: host_matrix_verified
 
 hub:
   robot_types:

@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0] - 2026-08-24
+
+### Changed
+- Rewritten as the first Golden Host Skill (Skill Runtime 2.0, doc §49):
+  v2 manifest with capability `environment.install.ros`, typed
+  planner/verifier/recover in `entrypoint.py` — all ROS domain knowledge
+  lives in the skill, not in ROSClaw Core.
+- Default flow is the official `ros2-apt-source` deb (digest-pinned);
+  no raw.githubusercontent key download, no FishROS by default.
+- Success is defined by the verifier: /opt/ros, ros2 CLI, ROS_DISTRO,
+  rosdep, and a real DDS talker/listener round-trip.
+
+### Evidence
+- host-skill-matrix workflow: unit tests + real clean-install verify on
+  Ubuntu 22.04 / 24.04 (HOST_MATRIX_VERIFIED).
+
 ## [0.1.0] - 2026-06-25
 
 ### Added
