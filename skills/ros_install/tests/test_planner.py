@@ -63,6 +63,9 @@ class TestDistroMatrix:
             p for op in plan["operations"] if op["type"] == "package.install" for p in op["packages"]
         ]
         assert "ros-jazzy-desktop" in packages
+        # doc §39: the pub/sub verifier's graph packages are explicit deps.
+        assert "ros-jazzy-demo-nodes-cpp" in packages
+        assert "ros-jazzy-demo-nodes-py" in packages
 
     def test_jammy_maps_to_humble(self, skill, monkeypatch):
         _clean_host(skill, monkeypatch)

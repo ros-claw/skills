@@ -57,6 +57,13 @@ PROFILES = {
     "development": ["ros-{distro}-desktop", "ros-dev-tools"],
 }
 
+# The verifier runs a real ROS graph (doc §39); these are its explicit
+# dependencies — desktop variants do not reliably pull them in.
+VERIFY_PACKAGES = [
+    "ros-{distro}-demo-nodes-cpp",
+    "ros-{distro}-demo-nodes-py",
+]
+
 ROSDEP_SOURCES = """\
 # os-specific listings first
 yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/osx-homebrew.yaml osx
@@ -163,7 +170,9 @@ def plan(context: dict, args: dict) -> dict:
     operations.append(
         {
             "type": "package.install",
-            "packages": [p.format(distro=distro) for p in PROFILES[profile]],
+            "packages": [
+                p.format(distro=distro) for p in [*PROFILES[profile], *VERIFY_PACKAGES]
+            ],
         }
     )
     operations.append({"type": "package.install", "packages": ["python3-rosdep"]})
