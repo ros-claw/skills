@@ -2,97 +2,101 @@
 
 ## What it does
 
-`ros_install` is a ROSClaw Skill for installing, verifying, and repairing a
-ROS / ROS 2 environment on the host workstation. It is inspired by the
-[FishROS one-click installer](https://github.com/fishros/install) but is
-rewritten as a versioned, auditable, and agent-callable Skill package.
+`ros_install` is the first **Golden Host Skill** of the ROSClaw Skill
+Runtime 2.0: it installs, verifies, and repairs a ROS / ROS 2 environment
+on the host workstation through **typed HostOps plans** — never ad-hoc
+shell. All ROS domain knowledge (distro matrix, official
+`ros2-apt-source` flow, verification, recovery) lives in
+[`entrypoint.py`](entrypoint.py), not in ROSClaw Core.
 
-The skill supports three modes:
+Default distro mapping (skill data, upgraded by skill releases):
 
-- `native` — official apt-based ROS / ROS 2 installation (default).
-- `docker` — run ROS inside a container without polluting the host.
-- `fishros` — delegate to the FishROS install script after explicit opt-in
-  (`--allow-remote-script`).
+| Host OS        | ROS distro | Codename |
+|----------------|------------|----------|
+| Ubuntu 24.04   | ROS 2 Jazzy | noble   |
+| Ubuntu 22.04   | ROS 2 Humble | jammy   |
 
-Default distro mapping:
+Install profiles (`--args '{"profile": "..."}'`): `desktop` (default),
+`ros-base`, `development`.
 
-| Host OS        | Default distro |
-|----------------|----------------|
-| Ubuntu 22.04   | ROS 2 Humble   |
-| Ubuntu 24.04   | ROS 2 Jazzy    |
-| Ubuntu 20.04   | Noetic blocked by default (EOL 2025-05-31) |
+## How it works
 
-## Supported robots
+1. **plan** — the planner probes the host (`/etc/os-release`, arch,
+   `/opt/ros`, rosdep state, apt source state) and emits a typed
+   ExecutionPlan: official `ros2-apt-source` deb (digest-pinned), apt
+   packages, rosdep sources, and a managed environment file. No
+   `raw.githubusercontent.com` key download, no `curl | bash`, no shell.
+2. **approve** — the operator approves the exact plan hash.
+3. **authorize** — `rosclaw host authorize <JOB_ID>` authenticates with
+   sudo on the local TTY; the password never enters any agent context.
+4. **execute** — the HostOps broker converts typed operations into safe
+   argv itself.
+5. **verify** — success means ROS actually works: `/opt/ros/<distro>`,
+   `ros2` CLI, `ROS_DISTRO` environment, rosdep, and a real DDS
+   publisher/subscriber round-trip (`demo_nodes_cpp` talker +
+   `demo_nodes_py` listener).
 
-- `host_workstation`
+## Commands
 
-## Required sensors
+```bash
+# Discover (agents use this; you never need the skill name)
+rosclaw skill search "install ros2"
 
-- `host_state` (OS release, existing ROS paths, apt availability)
+# Install the skill package itself (digest-pinned from the official registry)
+rosclaw skill install ros-claw/ros_install
 
-## Required providers
+# Plan the ROS installation for this host
+rosclaw skill run ros-claw/ros_install --action plan --json
 
-- `local_ros_distro_detector`
-- `local_apt_executor`
-- `local_shell_executor`
-- `local_distro_validator`
+# Approve the exact plan and queue execution
+rosclaw skill run ros-claw/ros_install --action install --approve <PLAN_HASH>
 
-See `providers.yaml` for capability routes.
+# Authenticate locally and execute (operator TTY)
+rosclaw host authorize <JOB_ID>
+
+# Inspect the job / receipt
+rosclaw skill job <JOB_ID> --json
+```
+
+Agents (Hermes / Codex / Claude Code) use the MCP surface instead:
+`resolve_capability("帮我安装 ROS2")` → `invoke_capability(...)` → the job
+waits for your local `rosclaw host authorize <JOB_ID>`.
 
 ## Safety constraints
 
-- See `safety.yaml`
-- Default runtime mode: `dry_run`
-- Host modification is only performed when `--execute` is explicitly set.
-- `sudo` usage requires user confirmation.
-- Unsupported / EOL distros are blocked in `sandbox` checks.
-
-## Install
-
-```bash
-rosclaw skill install ros-claw/ros_install
-```
-
-## How to run
-
-```bash
-# Plan only (recommended first step)
-rosclaw skill run ros_install --action plan --distro auto --mode native
-
-# Install with explicit execution permission
-rosclaw skill run ros_install --action install --distro humble --mode native --allow-sudo --execute
-
-# Verify an existing installation
-rosclaw skill run ros_install --action verify
-
-# Repair rosdep / environment
-rosclaw skill run ros_install --action doctor
-```
-
-Lifecycle commands:
-
-```bash
-rosclaw skill validate ros_install
-rosclaw skill eval ros_install --mode replay
-rosclaw skill package ros_install
-rosclaw skill verify-package ros_install-0.1.0.tar.gz
-```
-
-## Evaluation evidence
-
-See `evidence/reports/` for latest mining, eval, and verification reports.
+- Typed HostOps only; `arbitrary_root_shell: false`.
+- Approval binds to the plan hash — any plan change requires re-approval.
+- sudo authentication is local-TTY only; credentials never enter LLM/MCP/
+  trace/memory.
+- FishROS-style remote scripts are an explicit operator opt-in recovery
+  path, never the default.
 
 ## Version history
+
+### 0.2.0
+
+- Rewritten as the first Golden Host Skill (Skill Runtime 2.0):
+  v2 manifest, typed planner/verifier/recover in `entrypoint.py`,
+  official `ros2-apt-source` flow with pinned digests, host-matrix
+  verification evidence.
+- `skill run ros-claw/ros_install --action plan|install` now maps to the
+  real ROSClaw Core implementation.
 
 ### 0.1.0
 
 - Initial draft generated by `rosclaw skill init`.
 - Added host workstation compatibility and ROS installation behavior tree.
 
+## Evaluation evidence
+
+`HOST_MATRIX_VERIFIED` is produced by the
+[host-skill-matrix workflow](../../.github/workflows/host-skill-matrix.yml):
+planner unit tests plus a real clean-install → verify run on Ubuntu 22.04
+and 24.04 runners.
+
 ## Known limitations
 
 - This Skill is a host environment capability, not a robot motion skill.
-- Real `apt` / `sudo` execution is gated by `--execute`; without it the Skill
-  only produces an install plan.
-- Docker and FishROS modes require additional provider implementations in the
-  runtime.
+- Docker / FishROS alternative flows are recovery options, not the default.
+- rosdep index updates still depend on `raw.githubusercontent.com` at
+  *verification* time; the installation path itself does not (doc §52).

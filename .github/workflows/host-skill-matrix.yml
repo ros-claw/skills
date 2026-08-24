@@ -1,0 +1,144 @@
+name: Host Skill Matrix
+
+# HOST_MATRIX_VERIFIED evidence for golden host skills (rosclaw_skill优化.md
+# §40/§41): planner unit tests on every supported host, plus a real
+# clean-install → verify run of ros_install through ROSClaw Core on
+# Ubuntu 22.04 and 24.04.
+
+on:
+  pull_request:
+    paths:
+      - "skills/ros_install/**"
+      - "registry/**"
+      - ".github/workflows/host-skill-matrix.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "skills/ros_install/**"
+      - "registry/**"
+  workflow_dispatch:
+
+env:
+  # ROSClaw Core ref for the e2e install; main carries the Skill Runtime
+  # 2.0 execution plane (ros-claw/rosclaw#439).
+  ROSCLAW_CORE_REF: main
+
+jobs:
+  unit:
+    name: Planner unit tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pytest pyyaml
+      - run: python -m pytest skills/ros_install/tests/test_planner.py -q
+
+  e2e:
+    name: Real install + verify (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ROSClaw Core (Skill Runtime 2.0)
+        run: pip install "git+https://github.com/ros-claw/rosclaw.git@${ROSCLAW_CORE_REF}"
+
+      - name: Build registry pinned to this commit
+        run: |
+          python scripts/build_registry.py
+          # Serve the registry locally and pin the package source to the
+          # exact commit under test (production derives codeload URLs from
+          # repo+commit; CI overrides with archive_url for pre-merge HEADs).
+          python - << 'EOF'
+          import json, os
+          p = "registry/skills.json"
+          d = json.load(open(p))
+          sha = os.environ["GITHUB_SHA"]
+          for s in d["skills"]:
+              src = s.get("source", {})
+              if src.get("type") == "github_subdir":
+                  src["ref"] = sha
+                  src["archive_url"] = (
+                      f"https://codeload.github.com/ros-claw/skills/tar.gz/{sha}"
+                  )
+          json.dump(d, open(p, "w"), indent=2, ensure_ascii=False)
+          EOF
+
+      - name: Resolve and acquire the skill
+        env:
+          ROSCLAW_HOME: ${{ github.workspace }}/.rosclaw-e2e
+          ROSCLAW_SKILLS_REGISTRY_URL: file://${{ github.workspace }}/registry/skills.json
+        run: |
+          rosclaw skill search "install ros2" --json
+          rosclaw skill install ros-claw/ros_install --json
+
+      - name: Plan on the real host
+        env:
+          ROSCLAW_HOME: ${{ github.workspace }}/.rosclaw-e2e
+          ROSCLAW_SKILLS_REGISTRY_URL: file://${{ github.workspace }}/registry/skills.json
+        run: |
+          rosclaw skill run ros-claw/ros_install --action plan --json | tee plan.json
+          python - << 'EOF'
+          import json
+          plan = json.load(open("plan.json"))
+          assert plan["domain"] == "host"
+          assert plan["plan_hash"]
+          assert all("command" not in op for op in plan["operations"])
+          print("plan_hash:", plan["plan_hash"])
+          EOF
+
+      - name: Quiesce unattended apt services (avoid dpkg lock races)
+        run: |
+          sudo systemctl stop apt-daily.service apt-daily-upgrade.service apt-daily.timer apt-daily-upgrade.timer || true
+
+      - name: Approve, authorize and execute (passwordless sudo runner)
+        env:
+          ROSCLAW_HOME: ${{ github.workspace }}/.rosclaw-e2e
+          ROSCLAW_SKILLS_REGISTRY_URL: file://${{ github.workspace }}/registry/skills.json
+        run: |
+          PLAN_HASH=$(python -c "import json; print(json.load(open('plan.json'))['plan_hash'])")
+          rosclaw skill run ros-claw/ros_install --action install --approve "$PLAN_HASH" --json | tee auth.json
+          JOB_ID=$(python -c "import json; print(json.load(open('auth.json'))['job_id'])")
+          echo "JOB_ID=$JOB_ID" >> "$GITHUB_ENV"
+          rosclaw host authorize "$JOB_ID"
+
+      - name: Dump job and receipt (always, for diagnosis)
+        if: always()
+        env:
+          ROSCLAW_HOME: ${{ github.workspace }}/.rosclaw-e2e
+        run: |
+          rosclaw skill job "$JOB_ID" --json > job.json || true
+          cat job.json
+          RECEIPT=$(python -c "import json; print(json.load(open('job.json')).get('receipt_path',''))" 2>/dev/null || true)
+          if [ -n "$RECEIPT" ] && [ -f "$RECEIPT" ]; then cat "$RECEIPT"; else echo "no receipt yet"; fi
+
+      - name: Receipt must be VERIFIED
+        env:
+          ROSCLAW_HOME: ${{ github.workspace }}/.rosclaw-e2e
+        run: |
+          rosclaw skill job "$JOB_ID" --json | tee job.json
+          python - << 'EOF'
+          import json
+          job = json.load(open("job.json"))
+          assert job["status"] == "SUCCEEDED", job["status"]
+          receipt = json.load(open(job["receipt_path"]))
+          assert receipt["result"] == "VERIFIED", receipt.get("verification")
+          for key in ("opt_ros", "ros2_cli", "ros_distro_env", "dds_pubsub"):
+              assert receipt["verification"].get(key) == "PASS", (key, receipt["verification"])
+          print("HOST_MATRIX_VERIFIED:", receipt["verification"])
+          EOF

@@ -1,6 +1,6 @@
 {
   "schema_version": "rosclaw.skills_registry.v1",
-  "generated_at": "2026-07-02T07:00:26.351850Z",
+  "generated_at": "2026-08-24T11:16:51.842951Z",
   "source_repo": "https://github.com/ros-claw/skills",
   "skills": [
     {
@@ -86,10 +86,52 @@
       }
     },
     {
+      "name": "ros-claw/realsense_ops",
+      "display_name": "RealSense Operations Discipline (lifecycle, wedge recovery, USB topology)",
+      "version": "1.1.2",
+      "description": "Operational discipline for Intel RealSense D400 cameras on production rigs\n(Jetson / x86 Linux), distilled from field incidents on the ROSClaw\ndual-RH56 rig through 2026-08-03.  Complements the executable capture\nskill `realsense_capture_rgbd` (which takes pictures) and the community\n`realsense-troubleshoot` guide (generic app debugging) — this skill is\nabout NOT killing the camera or the USB host controller while running\nlong streaming sessions, and about recovering correctly when the bus\nwedges anyway.  Includes scripts/realsense_doctor.py: one-shot\nenumeration + controller-topology + dmesg-signature diagnosis with an\nescalation-ordered recovery recommendation.\n",
+      "category": "perception",
+      "robot_types": [
+        "universal"
+      ],
+      "compatible_robots": [
+        "universal"
+      ],
+      "tags": [
+        "realsense",
+        "d435i",
+        "d405",
+        "d455",
+        "usb",
+        "xhci",
+        "lifecycle",
+        "wedge-recovery",
+        "operations",
+        "physical-ai"
+      ],
+      "official": true,
+      "installable": true,
+      "verification_status": "official_verified",
+      "source": {
+        "type": "github_subdir",
+        "repo": "https://github.com/ros-claw/skills",
+        "ref": "main",
+        "subdir": "skills/realsense_ops"
+      },
+      "files": {
+        "skill_yaml": "skills/realsense_ops/skill.yaml",
+        "skill_md": "skills/realsense_ops/SKILL.md",
+        "readme": "skills/realsense_ops/README.md"
+      },
+      "checksums": {
+        "package_sha256": "sha256:0fdfbe2c2e80292658fbe62c09911482fbc7258ffc83cc60d03d613f97f725f8"
+      }
+    },
+    {
       "name": "ros-claw/ros_install",
       "display_name": "ROS Install",
-      "version": "0.1.0",
-      "description": "Install, verify, or repair a ROS / ROS 2 environment on the host workstation. Inspired by FishROS one-click installer.",
+      "version": "0.2.0",
+      "description": "Install, verify, or repair a ROS / ROS 2 environment on the host workstation. Uses the official ros2-apt-source flow with typed HostOps plans.",
       "category": "environment",
       "robot_types": [
         "universal"
@@ -103,11 +145,11 @@
         "host_workstation",
         "install",
         "environment",
-        "fishros-inspired"
+        "ros2-apt-source"
       ],
       "official": true,
       "installable": true,
-      "verification_status": "official_verified",
+      "verification_status": "host_matrix_verified",
       "source": {
         "type": "github_subdir",
         "repo": "https://github.com/ros-claw/skills",
@@ -120,7 +162,7 @@
         "readme": "skills/ros_install/README.md"
       },
       "checksums": {
-        "package_sha256": "sha256:c3b4ea399353e048027032c59229ecf23c710c777ddb9a515c2eb8f3bbe5524c"
+        "package_sha256": "sha256:c35f80566b23b9581571a6c00c285e1419695c8dc482f3eda41ff27afbc95627"
       }
     }
   ]
