@@ -264,6 +264,7 @@ def _verify_pubsub(distro: str) -> str:
         ["bash", "-c", f"{source} && exec demo_nodes_cpp talker"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
+        env=_clean_env(),
     )
     try:
         listener = subprocess.run(
@@ -271,6 +272,7 @@ def _verify_pubsub(distro: str) -> str:
             capture_output=True,
             text=True,
             timeout=60,
+            env=_clean_env(),
         )
         heard = "I heard" in (listener.stdout + listener.stderr)
         return "PASS" if heard else "FAIL"
@@ -284,10 +286,20 @@ def _verify_pubsub(distro: str) -> str:
             talker.kill()
 
 
+def _clean_env() -> dict:
+    """ROS commands need a pristine environment: a foreign PYTHONPATH or
+    LD_LIBRARY_PATH (e.g. from a CI Python toolchain) breaks the ros2 CLI's
+    importlib.metadata discovery and the demo nodes."""
+    env = dict(os.environ)
+    for key in ("PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV", "LD_LIBRARY_PATH"):
+        env.pop(key, None)
+    return env
+
+
 def _run(argv: list[str], *, timeout: int) -> tuple[int, str]:
     try:
         completed = subprocess.run(
-            argv, capture_output=True, text=True, timeout=timeout
+            argv, capture_output=True, text=True, timeout=timeout, env=_clean_env()
         )
         return completed.returncode, completed.stdout + completed.stderr
     except (subprocess.TimeoutExpired, OSError) as exc:
