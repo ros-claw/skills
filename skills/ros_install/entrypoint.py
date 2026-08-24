@@ -228,12 +228,16 @@ def verify(context: dict, receipt: dict) -> dict:
     opt_ros = Path(f"/opt/ros/{distro}")
     checks["opt_ros"] = "PASS" if opt_ros.is_dir() else "FAIL"
 
-    rc, out = _run([str(opt_ros / "bin" / "ros2"), "--help"], timeout=30)
+    # All ROS checks run through the sourced environment: the ros2 CLI and
+    # demo nodes are not importable/runnable without setup.sh (PYTHONPATH,
+    # AMENT_PREFIX_PATH, PATH).
+    source = f". /opt/ros/{distro}/setup.sh"
+    rc, out = _run(["bash", "-c", f"{source} && ros2 --help"], timeout=30)
     checks["ros2_cli"] = "PASS" if rc == 0 else "FAIL"
-    details["ros2_cli"] = out[:200]
+    details["ros2_cli"] = out[-300:]
 
     rc, out = _run(
-        ["bash", "-c", f". /opt/ros/{distro}/setup.sh && printf %s \"$ROS_DISTRO\""],
+        ["bash", "-c", f"{source} && printf %s \"$ROS_DISTRO\""],
         timeout=30,
     )
     checks["ros_distro_env"] = "PASS" if rc == 0 and out.strip() == distro else "FAIL"
@@ -247,7 +251,9 @@ def verify(context: dict, receipt: dict) -> dict:
     else:
         checks["rosdep"] = "FAIL"
 
-    checks["dds_pubsub"] = _verify_pubsub(distro)
+    pubsub_ok, pubsub_out = _verify_pubsub(distro)
+    checks["dds_pubsub"] = "PASS" if pubsub_ok else "FAIL"
+    details["dds_pubsub"] = pubsub_out[-300:]
 
     hard = ("opt_ros", "ros2_cli", "ros_distro_env", "dds_pubsub")
     verified = all(checks[k] == "PASS" for k in hard) and checks["rosdep"] in {
@@ -257,7 +263,7 @@ def verify(context: dict, receipt: dict) -> dict:
     return {**checks, "details": details, "result": "VERIFIED" if verified else "FAILED"}
 
 
-def _verify_pubsub(distro: str) -> str:
+def _verify_pubsub(distro: str) -> tuple[bool, str]:
     """doc §39: run a real ROS graph (talker + listener) and require messages."""
     source = f". /opt/ros/{distro}/setup.sh"
     talker = subprocess.Popen(
@@ -274,10 +280,10 @@ def _verify_pubsub(distro: str) -> str:
             timeout=60,
             env=_clean_env(),
         )
-        heard = "I heard" in (listener.stdout + listener.stderr)
-        return "PASS" if heard else "FAIL"
-    except (subprocess.TimeoutExpired, OSError):
-        return "FAIL"
+        output = listener.stdout + listener.stderr
+        return ("I heard" in output), output
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        return False, str(exc)
     finally:
         talker.terminate()
         try:
