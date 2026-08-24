@@ -20,9 +20,9 @@ on:
   workflow_dispatch:
 
 env:
-  # Flip back to `main` once ros-claw/rosclaw#439 (PR-7a execution plane)
-  # is merged; until then the e2e job needs the PR-7a core branch.
-  ROSCLAW_CORE_REF: skill2-pr7-core-exec
+  # ROSClaw Core ref for the e2e install; main carries the Skill Runtime
+  # 2.0 execution plane (ros-claw/rosclaw#439).
+  ROSCLAW_CORE_REF: main
 
 jobs:
   unit:
