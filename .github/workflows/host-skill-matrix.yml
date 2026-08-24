@@ -19,6 +19,11 @@ on:
       - "registry/**"
   workflow_dispatch:
 
+env:
+  # Flip back to `main` once ros-claw/rosclaw#439 (PR-7a execution plane)
+  # is merged; until then the e2e job needs the PR-7a core branch.
+  ROSCLAW_CORE_REF: skill2-pr7-core-exec
+
 jobs:
   unit:
     name: Planner unit tests (${{ matrix.os }})
@@ -51,7 +56,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install ROSClaw Core (Skill Runtime 2.0)
-        run: pip install "git+https://github.com/ros-claw/rosclaw.git@main"
+        run: pip install "git+https://github.com/ros-claw/rosclaw.git@${ROSCLAW_CORE_REF}"
 
       - name: Build registry pinned to this commit
         run: |
