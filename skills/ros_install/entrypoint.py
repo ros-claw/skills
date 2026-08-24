@@ -276,14 +276,14 @@ def _verify_pubsub(distro: str) -> tuple[bool, str]:
     """doc §39: run a real ROS graph (talker + listener) and require messages."""
     source = f". /opt/ros/{distro}/setup.sh"
     talker = subprocess.Popen(
-        ["bash", "-c", f"{source} && exec demo_nodes_cpp talker"],
+        ["bash", "-c", f"{source} && exec ros2 run demo_nodes_cpp talker"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         env=_clean_env(),
     )
     try:
         listener = subprocess.run(
-            ["bash", "-c", f"{source} && exec timeout 45 demo_nodes_py listener"],
+            ["bash", "-c", f"{source} && exec timeout 45 ros2 run demo_nodes_py listener"],
             capture_output=True,
             text=True,
             timeout=60,
