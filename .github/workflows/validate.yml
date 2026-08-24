@@ -50,6 +50,14 @@ jobs:
         run: |
           python scripts/build_registry.py
 
+      - name: Registry must match the committed one
+        run: |
+          # Catches stale digests (e.g. __pycache__ contamination) before merge.
+          git diff --exit-code registry/ || {
+            echo "::error::registry/skills.json is stale; run scripts/build_registry.py on a clean tree"
+            exit 1
+          }
+
       - name: Verify install dry-run
         run: |
           for d in skills/*; do

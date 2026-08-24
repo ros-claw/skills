@@ -19,9 +19,12 @@ REGISTRY_FILE = REGISTRY_DIR / "skills.json"
 def sha256_dir(path: Path) -> str:
     h = hashlib.sha256()
     for p in sorted(path.rglob("*")):
-        if p.is_file() and ".git" not in p.parts:
-            h.update(str(p.relative_to(path)).encode())
-            h.update(p.read_bytes())
+        if not p.is_file():
+            continue
+        if ".git" in p.parts or "__pycache__" in p.parts or p.suffix == ".pyc":
+            continue
+        h.update(str(p.relative_to(path)).encode())
+        h.update(p.read_bytes())
     return "sha256:" + h.hexdigest()
 
 
